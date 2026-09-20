@@ -6767,27 +6767,35 @@ function previewEssaPhoto() {
         photoInput.files[0];
 
 
-    const reader =
-        new FileReader();
-
-
-    reader.onload =
-        function(event) {
-
-            preview.src =
-                event.target.result;
-
-            fileName.textContent =
-                file.name;
-
-            selectionArea.style.display =
-                "block";
-        };
-
-
-    reader.readAsDataURL(
+    readImageFile(
         file
-    );
+    )
+        .then(
+            function(compressedPhoto) {
+
+                preview.src =
+                    compressedPhoto;
+
+                fileName.textContent =
+                    file.name;
+
+                selectionArea.style.display =
+                    "block";
+            }
+        )
+
+        .catch(
+            function(error) {
+
+                console.error(
+                    error
+                );
+
+                alert(
+                    "ESSAzLife could not read that image."
+                );
+            }
+        );
 }
 
 /* =========================================================
@@ -7020,7 +7028,7 @@ function updateCollarChoice() {
 
 
 /* =========================================================
-   READ IMAGE FILE
+   READ + COMPRESS IMAGE FILE
 ========================================================= */
 
 function readImageFile(
@@ -7050,9 +7058,97 @@ function readImageFile(
             reader.onload =
                 function(event) {
 
-                    resolve(
-                        event.target.result
-                    );
+                    const image =
+                        new Image();
+
+
+                    image.onload =
+                        function() {
+
+                            const maxSize =
+                                1200;
+
+                            let width =
+                                image.width;
+
+                            let height =
+                                image.height;
+
+
+                            if (
+                                width > maxSize ||
+                                height > maxSize
+                            ) {
+
+                                const scale =
+                                    Math.min(
+                                        maxSize / width,
+                                        maxSize / height
+                                    );
+
+                                width =
+                                    Math.round(
+                                        width * scale
+                                    );
+
+                                height =
+                                    Math.round(
+                                        height * scale
+                                    );
+                            }
+
+
+                            const canvas =
+                                document.createElement(
+                                    "canvas"
+                                );
+
+                            canvas.width =
+                                width;
+
+                            canvas.height =
+                                height;
+
+
+                            const context =
+                                canvas.getContext(
+                                    "2d"
+                                );
+
+
+                            context.drawImage(
+                                image,
+                                0,
+                                0,
+                                width,
+                                height
+                            );
+
+
+                            const compressedImage =
+                                canvas.toDataURL(
+                                    "image/jpeg",
+                                    0.78
+                                );
+
+
+                            resolve(
+                                compressedImage
+                            );
+                        };
+
+
+                    image.onerror =
+                        function(error) {
+
+                            reject(
+                                error
+                            );
+                        };
+
+
+                    image.src =
+                        event.target.result;
                 };
 
 
@@ -17021,32 +17117,1029 @@ function renderDiary() {
                 </div>
 
 
-                <button
-    class="handler-action-button primary"
-    onclick="
-        showDiaryEntryForm()
+               <div
+    style="
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
     "
 >
-    + New Entry
-</button>
+
+    <button
+        class="handler-action-button primary"
+
+        onclick="
+            showDiaryEntryForm()
+        "
+    >
+        + New Entry
+    </button>
+
+
+    <button
+        class="handler-action-button"
+
+        onclick="
+            openJournalCustomizer()
+        "
+    >
+        🎨 Customize Journal
+    </button>
+
+</div>
+
+            </div>
+
+
+           <div
+    style="
+        display:flex;
+        justify-content:center;
+        padding:15px 0 30px;
+    "
+>
+
+    <button
+        type="button"
+
+        onclick="
+            openJournal()
+        "
+
+        style="
+            position:relative;
+            display:block;
+            padding:0;
+            border:none;
+            background:none;
+            cursor:pointer;
+            width:min(360px, 85vw);
+        "
+    >
+
+        <img
+            src="journal-covers/${
+                getCurrentUser()?.journalCover ||
+                "journal-bluewaves.png"
+            }"
+
+            alt="Your journal"
+
+            style="
+                display:block;
+                width:100%;
+                height:auto;
+                border-radius:10px;
+                box-shadow:
+                    0 12px 30px
+                    rgba(0,0,0,.22);
+            "
+        >
+
+        <div
+            style="
+                position:absolute;
+                left:18%;
+                right:12%;
+                top:32%;
+                text-align:center;
+                color:#26343b;
+                pointer-events:none;
+            "
+        >
+
+            <div
+                style="
+                    font-size:22px;
+                    font-weight:bold;
+                "
+            >
+                ${escapeHTML(
+                    getCurrentUser()?.nickname ||
+                    getCurrentUser()?.username ||
+                    "My"
+                )}'s Diary
+            </div>
+
+            <div
+                style="
+                    margin-top:2px;
+                    font-size:14px;
+                "
+            >
+                @${
+                    escapeHTML(
+                        (
+                            getCurrentUser()?.username ||
+                            "user"
+                        ).replace(/^@/, "")
+                    )
+                }
+            </div>
+
+        </div>
+
+    </button>
+
+</div>
+
+
+        </div>
+
+    `;
+}
+
+/* =========================================================
+   JOURNAL COVER CUSTOMIZER
+========================================================= */
+
+function openJournalCustomizer() {
+
+    const covers = [
+
+        {
+            file: "journal-bluewaves.png",
+            name: "Blue Waves"
+        },
+
+        {
+            file: "journal-camo.png",
+            name: "Camo"
+        },
+
+        {
+            file: "journal-cows.png",
+            name: "MooCow and DaisyBelle"
+        },
+
+        {
+            file: "journal-daisybelle.png",
+            name: "DaisyBelle"
+        },
+
+        {
+            file: "journal-essaflag.png",
+            name: "ESSA Flag"
+        },
+
+        {
+            file: "journal-ghostdogs.png",
+            name: "Ghost Dogs"
+        },
+
+        {
+            file: "journal-lily.png",
+            name: "Beagle"
+        },
+
+        {
+            file: "journal-mocha.png",
+            name: "German Pointer"
+        },
+
+        {
+            file: "journal-moose.png",
+            name: "Golden Retriever"
+        },
+
+        {
+            file: "journal-mudpie.png",
+            name: "Springer Spaniel"
+        },
+
+        {
+            file: "journal-oreo.png",
+            name: "Border Collie"
+        },
+
+        {
+            file: "journal-pumpkinpiestuff.png",
+            name: "Pumpkin Pie"
+        },
+
+        {
+            file: "journal-pumpkinspice.png",
+            name: "Pumpkin Spice"
+        },
+
+        {
+            file: "journal-spookycookies.png",
+            name: "Spooky Cookies"
+        },
+
+        {
+            file: "journal-stormy.png",
+            name: "Husky"
+        },
+
+        {
+            file: "journal-xmasdogs.png",
+            name: "Christmas Dogs"
+        }
+
+    ];
+
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+    overlay.className =
+        "handler-award-overlay";
+
+
+    const popup =
+        document.createElement(
+            "div"
+        );
+
+    popup.className =
+        "handler-award-popup";
+
+
+    let coverCards =
+        "";
+
+
+    covers.forEach(
+        function(cover) {
+
+            coverCards += `
+
+                <button
+                    type="button"
+
+                    onclick="
+                        selectJournalCover(
+                            '${cover.file}'
+                        )
+                    "
+
+                    style="
+                        border:1px solid #dbe5e7;
+                        background:white;
+                        border-radius:14px;
+                        padding:8px;
+                        cursor:pointer;
+                    "
+                >
+
+                    <img
+                        src="journal-covers/${cover.file}"
+
+                        alt="${cover.name}"
+
+                        style="
+                            width:120px;
+                            aspect-ratio:3 / 4;
+                            object-fit:cover;
+                            border-radius:9px;
+                            display:block;
+                        "
+                    >
+
+                    <div
+                        style="
+                            margin-top:7px;
+                            font-size:12px;
+                            font-weight:bold;
+                            color:#26343b;
+                        "
+                    >
+                        ${cover.name}
+                    </div>
+
+                </button>
+
+            `;
+        }
+    );
+
+
+    popup.innerHTML = `
+
+        <h2>
+            🎨 Choose Your Journal
+        </h2>
+
+        <p
+            style="
+                color:#68777b;
+                margin-top:0;
+            "
+        >
+            Pick a cover for your diary.
+        </p>
+
+
+        <div
+            style="
+                display:grid;
+                grid-template-columns:
+                    repeat(auto-fit, minmax(130px, 1fr));
+                gap:12px;
+                width:100%;
+                overflow-y:auto;
+                padding:5px;
+            "
+        >
+            ${coverCards}
+        </div>
+
+
+        <div
+            class="handler-award-popup-buttons"
+        >
+
+            <button
+                type="button"
+                class="handler-results-close"
+
+                onclick="
+                    closeHandlerAward()
+                "
+            >
+                Cancel
+            </button>
+
+        </div>
+
+    `;
+
+
+    overlay.appendChild(
+        popup
+    );
+
+    document.body.appendChild(
+        overlay
+    );
+}
+
+/* =========================================================
+   SELECT JOURNAL COVER
+========================================================= */
+
+function selectJournalCover(
+    coverFile
+) {
+
+    const user =
+        getCurrentUser();
+
+    if (!user) {
+        return;
+    }
+
+
+    const accounts =
+        getAccounts();
+
+
+    const accountIndex =
+        accounts.findIndex(
+            function(account) {
+
+                return (
+                    String(account.id) ===
+                    String(user.id)
+                );
+            }
+        );
+
+
+    if (accountIndex === -1) {
+        return;
+    }
+
+
+    accounts[
+        accountIndex
+    ].journalCover =
+        coverFile;
+
+
+    saveAccounts(
+        accounts
+    );
+
+
+    closeHandlerAward();
+
+    renderDiary();
+}
+
+/* =========================================================
+   OPEN JOURNAL
+========================================================= */
+
+function openJournal() {
+
+    const entries =
+        getSavedDiaryEntries()
+            .slice()
+            .sort(
+                function(a, b) {
+
+                    return (
+                        new Date(
+                            a.createdAt
+                        ) -
+                        new Date(
+                            b.createdAt
+                        )
+                    );
+                }
+            );
+
+
+    showJournalPage(
+        entries,
+        Math.max(
+            0,
+            entries.length - 1
+        )
+    );
+}
+
+/* =========================================================
+   SHOW JOURNAL PAGE
+========================================================= */
+
+function showJournalPage(
+    entries,
+    pageIndex = 0
+) {
+
+    if (
+        !entries ||
+        entries.length === 0
+    ) {
+
+        document.querySelector(
+            "main"
+        ).innerHTML = `
+
+            ${makeAppTabs(
+                "Diary"
+            )}
+
+            <div
+                style="
+                    max-width:850px;
+                    margin:30px auto;
+                    text-align:center;
+                "
+            >
+
+                <button
+                    class="handler-action-button"
+                    onclick="
+                        renderDiary()
+                    "
+                >
+                    ← Close Journal
+                </button>
+
+                <div
+                    style="
+                        margin-top:25px;
+                        padding:50px 25px;
+                        background:#fffdf7;
+                        border:1px solid #d8d1c4;
+                        border-radius:18px;
+                    "
+                >
+
+                    <h2>
+                        📖 Your journal is empty.
+                    </h2>
+
+                    <p>
+                        Your first entry is waiting to be written.
+                    </p>
+
+                    <button
+                        class="handler-action-button primary"
+                        onclick="
+                            showDiaryEntryForm()
+                        "
+                    >
+                        + New Entry
+                    </button>
+
+                </div>
+
+            </div>
+        `;
+
+        return;
+    }
+
+
+    pageIndex =
+        Math.max(
+            0,
+            Math.min(
+                pageIndex,
+                entries.length - 1
+            )
+        );
+
+
+    const entry =
+        entries[
+            pageIndex
+        ];
+
+
+    document.querySelector(
+        "main"
+    ).innerHTML = `
+
+        ${makeAppTabs(
+            "Diary"
+        )}
+
+        <div
+            style="
+                max-width:900px;
+                margin:25px auto;
+            "
+        >
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:space-between;
+                    align-items:center;
+                    gap:10px;
+                    flex-wrap:wrap;
+                    margin-bottom:18px;
+                "
+            >
+
+                <button
+                    class="handler-action-button"
+                    onclick="
+                        renderDiary()
+                    "
+                >
+                    ← Close Journal
+                </button>
+
+                <button
+                    class="handler-action-button primary"
+                    onclick="
+                        showDiaryEntryForm()
+                    "
+                >
+                    + New Entry
+                </button>
 
             </div>
 
 
             <div
                 style="
-                    display:flex;
-                    flex-direction:column;
-                    gap:14px;
+                    background:#fffdf7;
+                    border:1px solid #d8d1c4;
+                    border-radius:18px;
+                    padding:35px;
+                    min-height:500px;
+                    box-shadow:
+                        0 12px 30px
+                        rgba(0,0,0,.12);
                 "
             >
-                ${cards}
-            </div>
 
+                <div
+    style="
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:15px;
+        margin-bottom:20px;
+    "
+>
 
+    <div
+        style="
+            flex:1;
+            text-align:center;
+        "
+    >
+
+        <div
+            style="
+                color:#68777b;
+                font-size:14px;
+                margin-bottom:10px;
+            "
+        >
+            ${formatDateTime(
+                entry.createdAt
+            )}
         </div>
 
+
+        <h1
+            style="
+                margin:0;
+            "
+        >
+            ${entry.mood || "📝"}
+
+            ${escapeHTML(
+                entry.title ||
+                "Untitled Entry"
+            )}
+        </h1>
+
+    </div>
+
+
+    <div
+        style="
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+        "
+    >
+
+        <button
+            type="button"
+            class="handler-action-button primary"
+
+            onclick="
+                showDiaryEntryForm(
+                    '${entry.id}'
+                )
+            "
+        >
+            ✏️ Edit
+        </button>
+
+
+        <button
+            type="button"
+
+            onclick="
+                deleteDiaryEntry(
+                    '${entry.id}'
+                )
+            "
+
+            style="
+                padding:10px 14px;
+                border-radius:10px;
+                border:1px solid #f3b8b3;
+                background:#fff5f4;
+                color:#b42318;
+                font-weight:bold;
+                cursor:pointer;
+            "
+        >
+            🗑️ Delete
+        </button>
+
+    </div>
+
+</div>
+
+               <div
+    style="
+        white-space:pre-wrap;
+        line-height:1.7;
+        margin-top:25px;
+    "
+>${escapeHTML(
+    entry.text ||
+    ""
+)}</div>
+
+${
+    entry.drawing
+
+        ? `
+
+            <div
+                style="
+                    display:flex;
+                    justify-content:center;
+                    margin-top:25px;
+                "
+            >
+
+                <img
+                    src="${entry.drawing}"
+
+                    alt="Handwritten diary entry"
+
+                    onclick="
+                        openDiaryImage(
+                            this.src
+                        )
+                    "
+
+                    style="
+                        display:block;
+                        width:auto;
+                        max-width:100%;
+                        max-height:600px;
+                        object-fit:contain;
+                        border-radius:12px;
+                        border:1px solid #dbe5e7;
+                        box-shadow:
+                            0 4px 14px
+                            rgba(0,0,0,.10);
+                        cursor:pointer;
+                    "
+                >
+
+            </div>
+
+        `
+
+        : ""
+}
+
+
+${
+    Array.isArray(
+        entry.images
+    ) &&
+    entry.images.length > 0
+
+        ? `
+
+            <div
+                style="
+                    display:grid;
+                    grid-template-columns:
+                        repeat(auto-fit, minmax(150px, 1fr));
+                    gap:12px;
+                    margin-top:30px;
+                "
+            >
+
+                ${
+                    entry.images
+                        .map(
+                            function(image) {
+
+                                return `
+
+                                   <img
+    src="${image}"
+
+    alt="Diary photo"
+
+    onclick="
+        openDiaryImage(
+            this.src
+        )
+    "
+
+    style="
+        width:150px;
+        height:150px;
+        max-width:100%;
+        object-fit:cover;
+        border-radius:14px;
+        border:1px solid #dbe5e7;
+        display:block;
+        cursor:pointer;
+    "
+>
+
+                                `;
+                            }
+                        )
+                        .join("")
+                }
+
+            </div>
+
+        `
+
+        : ""
+}
+
+
+                <div
+                    style="
+                        display:flex;
+                        justify-content:space-between;
+                        align-items:center;
+                        gap:12px;
+                        margin-top:40px;
+                    "
+                >
+
+                    <button
+                        class="handler-action-button"
+
+                        ${
+                            pageIndex === 0
+                                ? "disabled"
+                                : ""
+                        }
+
+                        onclick="
+                            showJournalPage(
+                                getSavedDiaryEntries()
+                                    .slice()
+                                    .sort(
+                                        function(a, b) {
+                                            return (
+                                                new Date(a.createdAt) -
+                                                new Date(b.createdAt)
+                                            );
+                                        }
+                                    ),
+                                ${pageIndex - 1}
+                            )
+                        "
+                    >
+                        ← Previous
+                    </button>
+
+
+                    <span
+                        style="
+                            color:#68777b;
+                            font-size:14px;
+                        "
+                    >
+                        Page
+                        ${pageIndex + 1}
+                        of
+                        ${entries.length}
+                    </span>
+
+
+                    <button
+                        class="handler-action-button"
+
+                        ${
+                            pageIndex ===
+                            entries.length - 1
+
+                                ? "disabled"
+                                : ""
+                        }
+
+                        onclick="
+                            showJournalPage(
+                                getSavedDiaryEntries()
+                                    .slice()
+                                    .sort(
+                                        function(a, b) {
+                                            return (
+                                                new Date(b.createdAt) -
+                                                new Date(a.createdAt)
+                                            );
+                                        }
+                                    ),
+                                ${pageIndex + 1}
+                            )
+                        "
+                    >
+                        Next →
+                    </button>
+
+                </div>
+
+            </div>
+
+        </div>
     `;
+}
+
+/* =========================================================
+   OPEN DIARY IMAGE
+========================================================= */
+
+function openDiaryImage(
+    imageSource
+) {
+
+    const overlay =
+        document.createElement(
+            "div"
+        );
+
+
+    overlay.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:20000;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        padding:20px;
+        box-sizing:border-box;
+        background:rgba(0,0,0,.85);
+        cursor:pointer;
+    `;
+
+
+    const image =
+        document.createElement(
+            "img"
+        );
+
+
+    image.src =
+        imageSource;
+
+
+    image.alt =
+        "Expanded diary photo";
+
+
+    image.style.cssText = `
+        display:block;
+        max-width:95vw;
+        max-height:90vh;
+        width:auto;
+        height:auto;
+        object-fit:contain;
+        border-radius:14px;
+        box-shadow:0 10px 40px rgba(0,0,0,.45);
+        cursor:default;
+    `;
+
+
+    image.onclick =
+        function(event) {
+
+            event.stopPropagation();
+        };
+
+
+    const closeButton =
+        document.createElement(
+            "button"
+        );
+
+
+    closeButton.type =
+        "button";
+
+
+    closeButton.textContent =
+        "✕";
+
+
+    closeButton.style.cssText = `
+        position:fixed;
+        top:20px;
+        right:20px;
+        width:44px;
+        height:44px;
+        border:none;
+        border-radius:50%;
+        background:white;
+        color:#26343b;
+        font-size:20px;
+        font-weight:bold;
+        cursor:pointer;
+        box-shadow:0 3px 12px rgba(0,0,0,.3);
+    `;
+
+
+    closeButton.onclick =
+        function(event) {
+
+            event.stopPropagation();
+
+            overlay.remove();
+        };
+
+
+    overlay.onclick =
+        function() {
+
+            overlay.remove();
+        };
+
+
+    overlay.appendChild(
+        image
+    );
+
+
+    overlay.appendChild(
+        closeButton
+    );
+
+
+    document.body.appendChild(
+        overlay
+    );
 }
 
 
@@ -17120,6 +18213,20 @@ function showDiaryEntryForm(
             )
 
             : null;
+
+            if (
+    existing &&
+    existing.drawing
+) {
+
+    window.currentDiaryDrawing =
+        existing.drawing;
+
+} else {
+
+    window.currentDiaryDrawing =
+        null;
+}
 
 
     document.querySelector(
@@ -17225,62 +18332,340 @@ function showDiaryEntryForm(
             </select>
 
 
-            <label>
-                Title
-            </label>
+           <label>
+    Title
+</label>
 
 
-            <input
-                id="diary-title"
+<input
+    id="diary-title"
 
-                type="text"
+    type="text"
 
-                maxlength="100"
+    maxlength="100"
 
-                value="${escapeHTML(
-                    existing?.title ||
-                    ""
-                )}"
+    value="${escapeHTML(
+        existing?.title ||
+        ""
+    )}"
 
-                placeholder="Give this entry a title..."
+    placeholder="Give this entry a title..."
+>
+
+
+<label>
+    Entry Type
+</label>
+
+
+<div
+    style="
+        display:flex;
+        gap:12px;
+        flex-wrap:wrap;
+        margin-bottom:18px;
+    "
+>
+
+    <label
+        style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 16px;
+            border:2px solid var(--user-theme-color, #4fb5ae);
+            border-radius:999px;
+            cursor:pointer;
+            font-weight:bold;
+        "
+    >
+
+      <input
+    type="radio"
+    name="diary-entry-type"
+    value="type"
+
+    ${
+        existing?.drawing
+            ? ""
+            : "checked"
+    }
+
+    onchange="
+        switchDiaryEntryType(
+            'type'
+        )
+    "
+>
+        ⌨️ Type
+
+    </label>
+
+
+    <label
+        style="
+            display:flex;
+            align-items:center;
+            gap:8px;
+            padding:10px 16px;
+            border:2px solid var(--user-theme-color, #4fb5ae);
+            border-radius:999px;
+            cursor:pointer;
+            font-weight:bold;
+        "
+    >
+
+      <input
+    type="radio"
+    name="diary-entry-type"
+    value="draw"
+
+    ${
+        existing?.drawing
+            ? "checked"
+            : ""
+    }
+
+    onchange="
+        switchDiaryEntryType(
+            'draw'
+        )
+    "
+>
+
+        ✍️ Draw
+
+    </label>
+
+</div>
+
+
+<label
+    id="diary-entry-label"
+>
+    Entry
+</label>
+
+
+<textarea
+    id="diary-text"
+
+    style="
+        min-height:280px;
+        resize:vertical;
+    "
+
+    placeholder="Write whatever is on your mind..."
+>${escapeHTML(
+    existing?.text ||
+    ""
+)}</textarea>
+
+<div
+    id="diary-draw-area"
+
+    style="
+        display:none;
+        margin-top:5px;
+    "
+>
+
+    <div
+        style="
+            border:2px solid var(--user-theme-color, #4fb5ae);
+            border-radius:16px;
+            overflow:hidden;
+            background:#fffef8;
+        "
+    >
+
+        <div
+            style="
+                display:flex;
+                align-items:center;
+                gap:10px;
+                flex-wrap:wrap;
+                padding:12px;
+                border-bottom:1px solid #dbe5e7;
+                background:#ffffff;
+            "
+        >
+
+            <button
+                type="button"
+                class="handler-action-button primary"
+                id="diary-brush-button"
             >
+                🖊️ Brush
+            </button>
 
 
-            <label>
-                Entry
-            </label>
+            <button
+                type="button"
+                class="handler-action-button"
+                id="diary-eraser-button"
+            >
+                🧽 Eraser
+            </button>
 
 
-            <textarea
-                id="diary-text"
+            <button
+                type="button"
+                class="handler-action-button"
+                id="diary-clear-drawing-button"
+            >
+                🗑️ Clear
+            </button>
 
+            <button
+    type="button"
+    class="handler-action-button primary"
+
+    id="diary-finish-drawing-button"
+
+    onclick="
+        finishDiaryDrawing()
+    "
+>
+    ✓ Finish
+</button>
+
+
+            <span
                 style="
-                    min-height:280px;
-                    resize:vertical;
+                    margin-left:auto;
+                    color:#68777b;
+                    font-size:13px;
                 "
+            >
+                ✌️ Pinch with two fingers to zoom
+            </span>
 
-                placeholder="Write whatever is on your mind..."
-            >${escapeHTML(
-                existing?.text ||
-                ""
-            )}</textarea>
+        </div>
 
+
+       <div
+    id="diary-canvas-viewport"
+
+    style="
+        position:relative;
+        width:100%;
+        height:500px;
+        overflow:hidden;
+        touch-action:none;
+        background:#f3efe4;
+    "
+>
+
+   <div
+    id="diary-canvas-zoom-layer"
+
+    style="
+        position:absolute;
+        left:50%;
+        top:50%;
+        height:100%;
+        aspect-ratio:3 / 4;
+        background:
+            url('Diary-Paper.png')
+            center / 100% 100%
+            no-repeat;
+        transform:
+            translate(-50%, -50%)
+            scale(1);
+        transform-origin:center center;
+        touch-action:none;
+    "
+>
+
+    <canvas
+        id="diary-drawing-canvas"
+
+        width="1200"
+        height="1600"
+
+        style="
+            display:block;
+            width:100%;
+            height:100%;
+            background:transparent;
+            touch-action:none;
+            box-shadow:
+                0 3px 15px
+                rgba(0,0,0,.12);
+        "
+    ></canvas>
+
+</div>
+
+</div>
+
+
+        <div
+            style="
+                padding:12px;
+                text-align:center;
+                color:#68777b;
+                font-size:13px;
+                background:white;
+            "
+        >
+            Use your mouse, finger, or stylus to write and draw.
+        </div>
+
+    </div>
+
+</div>
 
             <label>
                 Add Images
             </label>
 
 
-            <input
-                id="diary-images"
+           <input
+    id="diary-images"
 
-                type="file"
+    type="file"
 
-                accept="image/*"
+    accept="image/*"
 
-                multiple
-            >
+    multiple
 
+    onchange="
+        previewDiaryImages()
+    "
+
+    style="
+        display:none;
+    "
+>
+
+
+<button
+    type="button"
+    class="handler-action-button primary"
+
+    onclick="
+        document.getElementById(
+            'diary-images'
+        ).click()
+    "
+>
+    📷 Add Photos
+</button>
+
+
+<div
+    id="diary-image-preview"
+
+    style="
+        display:flex;
+        gap:10px;
+        flex-wrap:wrap;
+        margin-top:12px;
+    "
+>
+</div>
 
             ${
                 existing &&
@@ -17369,6 +18754,19 @@ function showDiaryEntryForm(
 
     `;
 
+    if (
+    existing &&
+    existing.drawing
+) {
+
+    switchDiaryEntryType(
+        "draw"
+    );
+
+
+    redoDiaryDrawing();
+}
+
 
     if (
         existing
@@ -17387,6 +18785,1640 @@ function showDiaryEntryForm(
                 "😐";
         }
     }
+}
+
+/* =========================================================
+   SWITCH DIARY ENTRY TYPE
+========================================================= */
+
+function switchDiaryEntryType(
+    entryType
+) {
+
+    const textArea =
+        document.getElementById(
+            "diary-text"
+        );
+
+
+    const drawArea =
+        document.getElementById(
+            "diary-draw-area"
+        );
+
+
+    const entryLabel =
+        document.getElementById(
+            "diary-entry-label"
+        );
+
+
+    if (
+        !textArea ||
+        !drawArea
+    ) {
+        return;
+    }
+
+
+    if (
+        entryType === "draw"
+    ) {
+
+        textArea.style.display =
+            "none";
+
+
+        drawArea.style.display =
+            "block";
+
+        setupDiaryDrawingCanvas();
+
+
+        if (entryLabel) {
+
+            entryLabel.textContent =
+                "Draw / Write";
+        }
+
+    } else {
+
+        textArea.style.display =
+            "block";
+
+
+        drawArea.style.display =
+            "none";
+
+
+        if (entryLabel) {
+
+            entryLabel.textContent =
+                "Entry";
+        }
+
+    }
+}
+
+/* =========================================================
+   SET UP DIARY DRAWING CANVAS
+========================================================= */
+
+function setupDiaryDrawingCanvas() {
+
+    const canvas =
+        document.getElementById(
+            "diary-drawing-canvas"
+        );
+
+
+    const zoomLayer =
+        document.getElementById(
+            "diary-canvas-zoom-layer"
+        );
+
+
+    if (
+        !canvas ||
+        !zoomLayer
+    ) {
+        return;
+    }
+
+
+    const context =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    let isDrawing =
+        false;
+
+
+    let drawingPointerId =
+        null;
+
+
+    let tool =
+        "brush";
+
+
+    let zoom =
+        1;
+
+
+    let panX =
+        0;
+
+
+    let panY =
+        0;
+
+
+    const activeTouches =
+        new Map();
+
+
+    let pinchStartDistance =
+        0;
+
+
+    let pinchStartZoom =
+        1;
+
+
+    let pinchStartCenter =
+        null;
+
+
+    let pinchStartPanX =
+        0;
+
+
+    let pinchStartPanY =
+        0;
+
+
+    context.lineCap =
+        "round";
+
+    context.lineJoin =
+        "round";
+
+    context.lineWidth =
+        6;
+
+    context.strokeStyle =
+        "#26343b";
+
+
+    function updateZoomLayer() {
+
+        zoomLayer.style.transform = `
+            translate(
+                calc(-50% + ${panX}px),
+                calc(-50% + ${panY}px)
+            )
+            scale(${zoom})
+        `;
+    }
+
+
+    function getCanvasPoint(
+        event
+    ) {
+
+        const rect =
+            canvas.getBoundingClientRect();
+
+
+        return {
+
+            x:
+                (
+                    event.clientX -
+                    rect.left
+                ) *
+                (
+                    canvas.width /
+                    rect.width
+                ),
+
+            y:
+                (
+                    event.clientY -
+                    rect.top
+                ) *
+                (
+                    canvas.height /
+                    rect.height
+                )
+
+        };
+    }
+
+
+    function getTouchDistance() {
+
+        const touches =
+            Array.from(
+                activeTouches.values()
+            );
+
+
+        if (
+            touches.length < 2
+        ) {
+            return 0;
+        }
+
+
+        const x =
+            touches[1].x -
+            touches[0].x;
+
+
+        const y =
+            touches[1].y -
+            touches[0].y;
+
+
+        return Math.hypot(
+            x,
+            y
+        );
+    }
+
+
+    function getTouchCenter() {
+
+        const touches =
+            Array.from(
+                activeTouches.values()
+            );
+
+
+        if (
+            touches.length < 2
+        ) {
+            return null;
+        }
+
+
+        return {
+
+            x:
+                (
+                    touches[0].x +
+                    touches[1].x
+                ) / 2,
+
+            y:
+                (
+                    touches[0].y +
+                    touches[1].y
+                ) / 2
+
+        };
+    }
+
+
+    canvas.onpointerdown =
+        function(event) {
+
+            if (
+                event.pointerType === "touch"
+            ) {
+
+                activeTouches.set(
+                    event.pointerId,
+                    {
+                        x: event.clientX,
+                        y: event.clientY
+                    }
+                );
+
+
+                if (
+                    activeTouches.size >= 2
+                ) {
+
+                    isDrawing =
+                        false;
+
+
+                    drawingPointerId =
+                        null;
+
+
+                    context.beginPath();
+
+
+                    pinchStartDistance =
+                        getTouchDistance();
+
+
+                    pinchStartZoom =
+                        zoom;
+
+
+                    pinchStartCenter =
+                        getTouchCenter();
+
+
+                    pinchStartPanX =
+                        panX;
+
+
+                    pinchStartPanY =
+                        panY;
+
+
+                    return;
+                }
+            }
+
+
+            isDrawing =
+                true;
+
+
+            drawingPointerId =
+                event.pointerId;
+
+
+            try {
+
+                canvas.setPointerCapture(
+                    event.pointerId
+                );
+
+            } catch (error) {
+
+                // Pointer capture is not required
+                // on every browser/device.
+            }
+
+
+            const point =
+                getCanvasPoint(
+                    event
+                );
+
+
+            context.beginPath();
+
+
+            context.moveTo(
+                point.x,
+                point.y
+            );
+        };
+
+
+    canvas.onpointermove =
+        function(event) {
+
+            if (
+                event.pointerType === "touch" &&
+                activeTouches.has(
+                    event.pointerId
+                )
+            ) {
+
+                activeTouches.set(
+                    event.pointerId,
+                    {
+                        x: event.clientX,
+                        y: event.clientY
+                    }
+                );
+
+
+                if (
+                    activeTouches.size >= 2
+                ) {
+
+                    event.preventDefault();
+
+
+                    isDrawing =
+                        false;
+
+
+                    const distance =
+                        getTouchDistance();
+
+
+                    const center =
+                        getTouchCenter();
+
+
+                    if (
+                        pinchStartDistance > 0
+                    ) {
+
+                        zoom =
+                            pinchStartZoom *
+                            (
+                                distance /
+                                pinchStartDistance
+                            );
+
+
+                        zoom =
+                            Math.max(
+                                1,
+                                Math.min(
+                                    zoom,
+                                    4
+                                )
+                            );
+                    }
+
+
+                    if (
+                        center &&
+                        pinchStartCenter
+                    ) {
+
+                        panX =
+                            pinchStartPanX +
+                            (
+                                center.x -
+                                pinchStartCenter.x
+                            );
+
+
+                        panY =
+                            pinchStartPanY +
+                            (
+                                center.y -
+                                pinchStartCenter.y
+                            );
+                    }
+
+
+                    updateZoomLayer();
+
+
+                    return;
+                }
+            }
+
+
+            if (
+                !isDrawing ||
+                event.pointerId !==
+                drawingPointerId
+            ) {
+                return;
+            }
+
+
+            const point =
+                getCanvasPoint(
+                    event
+                );
+
+
+            if (
+                tool === "eraser"
+            ) {
+
+                context.globalCompositeOperation =
+                    "destination-out";
+
+
+                context.lineWidth =
+                    35;
+
+            } else {
+
+                context.globalCompositeOperation =
+                    "source-over";
+
+
+                context.strokeStyle =
+                    "#26343b";
+
+
+                context.lineWidth =
+                    6;
+            }
+
+
+            context.lineTo(
+                point.x,
+                point.y
+            );
+
+
+            context.stroke();
+        };
+
+
+    function endPointer(
+        event
+    ) {
+
+        if (
+            event.pointerType === "touch"
+        ) {
+
+            activeTouches.delete(
+                event.pointerId
+            );
+
+
+            if (
+                activeTouches.size < 2
+            ) {
+
+                pinchStartDistance =
+                    0;
+
+
+                pinchStartCenter =
+                    null;
+            }
+        }
+
+
+        if (
+            event.pointerId ===
+            drawingPointerId
+        ) {
+
+            isDrawing =
+                false;
+
+
+            drawingPointerId =
+                null;
+
+
+            context.beginPath();
+        }
+    }
+
+
+    canvas.onpointerup =
+        endPointer;
+
+
+    canvas.onpointercancel =
+        endPointer;
+
+
+    const brushButton =
+        document.getElementById(
+            "diary-brush-button"
+        );
+
+
+    const eraserButton =
+        document.getElementById(
+            "diary-eraser-button"
+        );
+
+
+    const clearButton =
+        document.getElementById(
+            "diary-clear-drawing-button"
+        );
+
+
+    if (brushButton) {
+
+        brushButton.onclick =
+            function() {
+
+                tool =
+                    "brush";
+            };
+    }
+
+
+    if (eraserButton) {
+
+        eraserButton.onclick =
+            function() {
+
+                tool =
+                    "eraser";
+            };
+    }
+
+
+    if (clearButton) {
+
+        clearButton.onclick =
+            function() {
+
+                context.clearRect(
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+            };
+    }
+
+
+    updateZoomLayer();
+}
+
+/* =========================================================
+   FINISH DIARY DRAWING
+========================================================= */
+
+function finishDiaryDrawing() {
+
+    const canvas =
+        document.getElementById(
+            "diary-drawing-canvas"
+        );
+
+
+    if (!canvas) {
+        return;
+    }
+
+
+    const paperImage =
+        new Image();
+
+
+    paperImage.onload =
+        function() {
+
+            const finishedCanvas =
+                document.createElement(
+                    "canvas"
+                );
+
+
+            finishedCanvas.width =
+                canvas.width;
+
+            finishedCanvas.height =
+                canvas.height;
+
+
+            const finishedContext =
+                finishedCanvas.getContext(
+                    "2d"
+                );
+
+
+            finishedContext.drawImage(
+                paperImage,
+                0,
+                0,
+                finishedCanvas.width,
+                finishedCanvas.height
+            );
+
+
+            finishedContext.drawImage(
+                canvas,
+                0,
+                0,
+                finishedCanvas.width,
+                finishedCanvas.height
+            );
+
+
+            const finishedDrawing =
+                finishedCanvas.toDataURL(
+                    "image/png"
+                );
+
+
+            window.currentDiaryDrawing =
+                finishedDrawing;
+
+
+            const drawArea =
+                document.getElementById(
+                    "diary-draw-area"
+                );
+
+
+            if (drawArea) {
+
+                drawArea.innerHTML = `
+
+                    <div
+                        style="
+                            text-align:center;
+                            padding:20px;
+                            border:2px solid var(--user-theme-color, #4fb5ae);
+                            border-radius:16px;
+                            background:#fffef8;
+                        "
+                    >
+
+                        <div
+                            style="
+                                font-weight:bold;
+                                margin-bottom:12px;
+                            "
+                        >
+                            ✓ Drawing Finished
+                        </div>
+
+
+                        <img
+                            src="${finishedDrawing}"
+
+                            alt="Finished diary drawing"
+
+                            style="
+                                display:block;
+                                width:auto;
+                                max-width:100%;
+                                max-height:400px;
+                                margin:0 auto 15px;
+                                object-fit:contain;
+                                border-radius:10px;
+                                border:1px solid #dbe5e7;
+                            "
+                        >
+
+
+                        <button
+                            type="button"
+                            class="handler-action-button"
+
+                            onclick="
+                                redoDiaryDrawing()
+                            "
+                        >
+                            ✏️ Keep Editing
+                        </button>
+
+                    </div>
+
+                `;
+            }
+        };
+
+
+    paperImage.src =
+        "Diary-Paper.png";
+}
+
+/* =========================================================
+   REDO DIARY DRAWING
+========================================================= */
+
+function redoDiaryDrawing() {
+
+    const savedDrawing =
+        window.currentDiaryDrawing;
+
+
+    const drawArea =
+        document.getElementById(
+            "diary-draw-area"
+        );
+
+
+    if (!drawArea) {
+        return;
+    }
+
+
+    drawArea.innerHTML = `
+
+        <div
+            style="
+                border:2px solid var(--user-theme-color, #4fb5ae);
+                border-radius:16px;
+                overflow:hidden;
+                background:#fffef8;
+            "
+        >
+
+            <div
+                style="
+                    display:flex;
+                    align-items:center;
+                    gap:10px;
+                    flex-wrap:wrap;
+                    padding:12px;
+                    border-bottom:1px solid #dbe5e7;
+                    background:#ffffff;
+                "
+            >
+
+                <button
+                    type="button"
+                    class="handler-action-button primary"
+                    id="diary-brush-button"
+                >
+                    🖊️ Brush
+                </button>
+
+
+                <button
+                    type="button"
+                    class="handler-action-button"
+                    id="diary-eraser-button"
+                >
+                    🧽 Eraser
+                </button>
+
+
+                <button
+                    type="button"
+                    class="handler-action-button"
+                    id="diary-clear-drawing-button"
+                >
+                    🗑️ Clear
+                </button>
+
+
+                <button
+                    type="button"
+                    class="handler-action-button primary"
+                    id="diary-finish-drawing-button"
+
+                    onclick="
+                        finishDiaryDrawing()
+                    "
+                >
+                    ✓ Finish
+                </button>
+
+
+                <span
+                    style="
+                        margin-left:auto;
+                        color:#68777b;
+                        font-size:13px;
+                    "
+                >
+                    ✌️ Pinch with two fingers to zoom
+                </span>
+
+            </div>
+
+
+            <div
+                id="diary-canvas-viewport"
+
+                style="
+                    position:relative;
+                    width:100%;
+                    height:500px;
+                    overflow:hidden;
+                    touch-action:none;
+                    background:
+    #f3efe4
+    url('Diary-Paper.png')
+    center / contain
+    no-repeat;
+                "
+            >
+
+                <div
+                    id="diary-canvas-zoom-layer"
+
+                    style="
+                        position:absolute;
+                        left:50%;
+                        top:50%;
+                        height:100%;
+                        transform:
+                            translate(-50%, -50%)
+                            scale(1);
+                        transform-origin:center center;
+                        touch-action:none;
+                    "
+                >
+
+                    <canvas
+                        id="diary-drawing-canvas"
+
+                        width="1200"
+                        height="1600"
+
+                        style="
+                            display:block;
+                            width:auto;
+                            height:100%;
+                           background:transparent;
+                            touch-action:none;
+                            box-shadow:
+                                0 3px 15px
+                                rgba(0,0,0,.12);
+                        "
+                    ></canvas>
+
+                </div>
+
+            </div>
+
+
+            <div
+                style="
+                    padding:12px;
+                    text-align:center;
+                    color:#68777b;
+                    font-size:13px;
+                    background:white;
+                "
+            >
+                Use your mouse, finger, or stylus to write and draw.
+            </div>
+
+        </div>
+    `;
+
+
+    setupDiaryDrawingCanvas();
+
+
+    if (savedDrawing) {
+
+        const canvas =
+            document.getElementById(
+                "diary-drawing-canvas"
+            );
+
+
+        const context =
+            canvas.getContext(
+                "2d"
+            );
+
+
+        const image =
+            new Image();
+
+
+        image.onload =
+            function() {
+
+                context.clearRect(
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+
+
+                context.drawImage(
+                    image,
+                    0,
+                    0,
+                    canvas.width,
+                    canvas.height
+                );
+            };
+
+
+        image.src =
+            savedDrawing;
+    }
+}
+
+/* =========================================================
+   PREVIEW DIARY IMAGES
+========================================================= */
+
+function previewDiaryImages() {
+
+    const input =
+        document.getElementById(
+            "diary-images"
+        );
+
+    const previewArea =
+        document.getElementById(
+            "diary-image-preview"
+        );
+
+
+    if (
+        !input ||
+        !previewArea
+    ) {
+        return;
+    }
+
+
+    previewArea.innerHTML =
+        "";
+
+
+    const files =
+        Array.from(
+            input.files || []
+        );
+
+
+    files.forEach(
+        function(
+            file,
+            index
+        ) {
+
+            const reader =
+                new FileReader();
+
+
+            reader.onload =
+                function(event) {
+
+                    const wrapper =
+                        document.createElement(
+                            "div"
+                        );
+
+
+                    wrapper.style.position =
+                        "relative";
+
+
+                   wrapper.innerHTML = `
+
+    <img
+        src="${event.target.result}"
+
+        style="
+            width:110px;
+            height:110px;
+            object-fit:cover;
+            border-radius:14px;
+            border:1px solid #dbe5e7;
+        "
+    >
+
+
+    <button
+        type="button"
+
+        onclick="
+            openDiaryImageCropper(
+                ${index}
+            )
+        "
+
+        title="Crop photo"
+
+        style="
+            position:absolute;
+            top:5px;
+            right:38px;
+            width:28px;
+            height:28px;
+            padding:0;
+            border:none;
+            border-radius:50%;
+            background:white;
+            color:#26343b;
+            font-weight:bold;
+            cursor:pointer;
+            box-shadow:
+                0 2px 6px
+                rgba(0,0,0,.2);
+        "
+    >
+        ✏️
+    </button>
+
+
+    <button
+        type="button"
+
+        onclick="
+            removeDiarySelectedImage(
+                ${index}
+            )
+        "
+
+        title="Remove photo"
+
+        style="
+            position:absolute;
+            top:5px;
+            right:5px;
+            width:28px;
+            height:28px;
+            padding:0;
+            border:none;
+            border-radius:50%;
+            background:white;
+            color:#b42318;
+            font-weight:bold;
+            cursor:pointer;
+            box-shadow:
+                0 2px 6px
+                rgba(0,0,0,.2);
+        "
+    >
+        ✕
+    </button>
+
+`;
+
+                    previewArea.appendChild(
+                        wrapper
+                    );
+                };
+
+
+            reader.readAsDataURL(
+                file
+            );
+        }
+    );
+}
+
+/* =========================================================
+   REMOVE SELECTED DIARY IMAGE
+========================================================= */
+
+function removeDiarySelectedImage(
+    removeIndex
+) {
+
+    const input =
+        document.getElementById(
+            "diary-images"
+        );
+
+
+    if (
+        !input ||
+        !input.files
+    ) {
+        return;
+    }
+
+
+    const dataTransfer =
+        new DataTransfer();
+
+
+    Array.from(
+        input.files
+    ).forEach(
+        function(
+            file,
+            index
+        ) {
+
+            if (
+                index !==
+                removeIndex
+            ) {
+
+                dataTransfer.items.add(
+                    file
+                );
+            }
+        }
+    );
+
+
+    input.files =
+        dataTransfer.files;
+
+
+    previewDiaryImages();
+}
+
+/* =========================================================
+   OPEN DIARY IMAGE CROPPER
+========================================================= */
+
+function openDiaryImageCropper(
+    imageIndex
+) {
+
+    const input =
+        document.getElementById(
+            "diary-images"
+        );
+
+    if (
+        !input ||
+        !input.files ||
+        !input.files[imageIndex]
+    ) {
+        return;
+    }
+
+
+    const file =
+        input.files[
+            imageIndex
+        ];
+
+
+    const reader =
+        new FileReader();
+
+
+    reader.onload =
+        function(event) {
+
+            const overlay =
+                document.createElement(
+                    "div"
+                );
+
+            overlay.className =
+                "handler-award-overlay";
+
+
+            const popup =
+                document.createElement(
+                    "div"
+                );
+
+            popup.className =
+                "handler-award-popup";
+
+
+            popup.innerHTML = `
+
+                <h2>
+                    ✏️ Crop Photo
+                </h2>
+
+
+                <div
+                    style="
+                        width:280px;
+                        height:280px;
+                        overflow:hidden;
+                        border-radius:18px;
+                        border:2px solid
+                            var(--user-theme-color, #4fb5ae);
+                        margin:0 auto 18px;
+                    "
+                >
+
+                    <img
+                        id="diary-crop-image"
+
+                        src="${event.target.result}"
+
+                        style="
+                            width:100%;
+                            height:100%;
+                            object-fit:cover;
+                            object-position:50% 50%;
+                            transform:scale(1);
+                        "
+                    >
+
+                </div>
+
+
+                <div
+                    style="
+                        width:100%;
+                        max-width:400px;
+                    "
+                >
+
+                    <label>
+                        ↔️ Left / Right
+                    </label>
+
+                    <input
+                        id="diary-crop-x"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="50"
+                        style="width:100%;"
+                    >
+
+
+                    <label
+                        style="
+                            display:block;
+                            margin-top:12px;
+                        "
+                    >
+                        ↕️ Up / Down
+                    </label>
+
+                    <input
+                        id="diary-crop-y"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="50"
+                        style="width:100%;"
+                    >
+
+
+                    <label
+                        style="
+                            display:block;
+                            margin-top:12px;
+                        "
+                    >
+                        🔍 Zoom
+                    </label>
+
+                    <input
+                        id="diary-crop-zoom"
+                        type="range"
+                        min="1"
+                        max="3"
+                        step="0.05"
+                        value="1"
+                        style="width:100%;"
+                    >
+
+                </div>
+
+
+                <div
+                    class="handler-award-popup-buttons"
+                >
+
+                    <button
+                        type="button"
+                        class="handler-action-button primary"
+
+                        onclick="
+                            saveDiaryImageCrop(
+                                ${imageIndex}
+                            )
+                        "
+                    >
+                        💾 Save Crop
+                    </button>
+
+
+                    <button
+                        type="button"
+                        class="handler-results-close"
+
+                        onclick="
+                            closeHandlerAward()
+                        "
+                    >
+                        Cancel
+                    </button>
+
+                </div>
+
+            `;
+
+
+            overlay.appendChild(
+                popup
+            );
+
+            document.body.appendChild(
+                overlay
+            );
+
+
+            const cropImage =
+                document.getElementById(
+                    "diary-crop-image"
+                );
+
+            const xSlider =
+                document.getElementById(
+                    "diary-crop-x"
+                );
+
+            const ySlider =
+                document.getElementById(
+                    "diary-crop-y"
+                );
+
+            const zoomSlider =
+                document.getElementById(
+                    "diary-crop-zoom"
+                );
+
+
+            function updateCropPreview() {
+
+                cropImage.style.objectPosition =
+                    `${xSlider.value}% ${ySlider.value}%`;
+
+                cropImage.style.transform =
+                    `scale(${zoomSlider.value})`;
+            }
+
+
+            xSlider.addEventListener(
+                "input",
+                updateCropPreview
+            );
+
+            ySlider.addEventListener(
+                "input",
+                updateCropPreview
+            );
+
+            zoomSlider.addEventListener(
+                "input",
+                updateCropPreview
+            );
+        };
+
+
+    reader.readAsDataURL(
+        file
+    );
+}
+
+/* =========================================================
+   SAVE DIARY IMAGE CROP
+========================================================= */
+
+function saveDiaryImageCrop(
+    imageIndex
+) {
+
+    const input =
+        document.getElementById(
+            "diary-images"
+        );
+
+    const cropImage =
+        document.getElementById(
+            "diary-crop-image"
+        );
+
+    const xSlider =
+        document.getElementById(
+            "diary-crop-x"
+        );
+
+    const ySlider =
+        document.getElementById(
+            "diary-crop-y"
+        );
+
+    const zoomSlider =
+        document.getElementById(
+            "diary-crop-zoom"
+        );
+
+
+    if (
+        !input ||
+        !input.files ||
+        !input.files[imageIndex] ||
+        !cropImage ||
+        !xSlider ||
+        !ySlider ||
+        !zoomSlider
+    ) {
+        return;
+    }
+
+
+    const sourceImage =
+        new Image();
+
+
+    sourceImage.onload =
+        function() {
+
+            const canvas =
+                document.createElement(
+                    "canvas"
+                );
+
+
+            const outputSize =
+                1000;
+
+
+            canvas.width =
+                outputSize;
+
+            canvas.height =
+                outputSize;
+
+
+            const context =
+                canvas.getContext(
+                    "2d"
+                );
+
+
+            const zoom =
+                Number(
+                    zoomSlider.value
+                );
+
+
+            const baseCropSize =
+                Math.min(
+                    sourceImage.width,
+                    sourceImage.height
+                );
+
+
+            const cropSize =
+                baseCropSize /
+                zoom;
+
+
+            const maxX =
+                sourceImage.width -
+                cropSize;
+
+            const maxY =
+                sourceImage.height -
+                cropSize;
+
+
+            const sourceX =
+                maxX *
+                (
+                    Number(
+                        xSlider.value
+                    ) / 100
+                );
+
+
+            const sourceY =
+                maxY *
+                (
+                    Number(
+                        ySlider.value
+                    ) / 100
+                );
+
+
+            context.drawImage(
+                sourceImage,
+                sourceX,
+                sourceY,
+                cropSize,
+                cropSize,
+                0,
+                0,
+                outputSize,
+                outputSize
+            );
+
+
+            canvas.toBlob(
+                function(blob) {
+
+                    if (!blob) {
+                        return;
+                    }
+
+
+                    const oldFile =
+                        input.files[
+                            imageIndex
+                        ];
+
+
+                    const croppedFile =
+                        new File(
+                            [blob],
+                            oldFile.name,
+                            {
+                                type:
+                                    "image/jpeg"
+                            }
+                        );
+
+
+                    const dataTransfer =
+                        new DataTransfer();
+
+
+                    Array.from(
+                        input.files
+                    ).forEach(
+                        function(
+                            file,
+                            index
+                        ) {
+
+                            dataTransfer.items.add(
+                                index === imageIndex
+                                    ? croppedFile
+                                    : file
+                            );
+                        }
+                    );
+
+
+                    input.files =
+                        dataTransfer.files;
+
+
+                    closeHandlerAward();
+
+                    previewDiaryImages();
+                },
+
+                "image/jpeg",
+                0.82
+            );
+        };
+
+
+    sourceImage.src =
+        cropImage.src;
 }
 
 
@@ -17470,13 +20502,19 @@ async function saveDiaryEntry(
             .trim();
 
 
+    const drawing =
+        window.currentDiaryDrawing ||
+        null;
+
+
     if (
         !title &&
-        !text
+        !text &&
+        !drawing
     ) {
 
         alert(
-            "Write a title or some text before saving."
+            "Write a title, some text, or create a drawing before saving."
         );
 
         return;
@@ -17572,6 +20610,11 @@ async function saveDiaryEntry(
             text:
                 text,
 
+            drawing:
+                drawing ||
+                existing.drawing ||
+                null,
+
             images:
                 [
                     ...(
@@ -17610,6 +20653,9 @@ async function saveDiaryEntry(
                 text:
                     text,
 
+                drawing:
+                    drawing,
+
                 images:
                     newImages,
 
@@ -17647,20 +20693,21 @@ async function saveDiaryEntry(
     }
 
 
+    window.currentDiaryDrawing =
+        null;
+
+
     if (
-        entryId
-    ) {
+    entryId
+) {
 
-        showDiaryEntry(
-            entryId
-        );
+    openJournal();
 
-    } else {
+} else {
 
-        renderDiary();
-    }
+    renderDiary();
 }
-
+}
 
 /* =========================================================
    VIEW DIARY ENTRY
