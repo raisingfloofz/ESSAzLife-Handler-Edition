@@ -9,10 +9,11 @@
   "background_color": "#ffffff",
   "theme_color": "#4fb5ae",
   "icons": [
-    {
-      "src": "MooCow.Icon.jpg",
-      "sizes": "any",
-      "type": "image/jpeg"
-    }
-  ]
+  {
+    "src": "Handler.Icon.512.png",
+    "sizes": "512x512",
+    "type": "image/png",
+    "purpose": "any"
+  }
+]
 }
