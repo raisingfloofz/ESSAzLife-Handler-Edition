@@ -1158,11 +1158,8 @@ function showPlayModePopup() {
 }
 
 function openPlayMode() {
-
-    document.getElementById(
-        "play-mode-popup"
-    ).remove();
-
+    window.location.href =
+        "https://raisingfloofz.github.io/ESSAzLife-PlayMode/";
 }
 
 /* =========================================================
@@ -17335,7 +17332,42 @@ function openJournalCustomizer() {
         {
             file: "journal-xmasdogs.png",
             name: "Christmas Dogs"
-        }
+        },
+
+        {
+    file: "journal-sheltie.png",
+    name: "Sheltie by Raina"
+},
+
+{
+    file: "journal-gsd.png",
+    name: "German Shepherd by D1v1ne_Essas"
+},
+
+{
+    file: "journal-essa-power.png",
+    name: "ESSA Power by foxy861929"
+},
+
+{
+    file: "journal-brown-cat.png",
+    name: "Brown Cat by I_love_SunSets_A_lot"
+},
+
+{
+    file: "journal-brown-dog.png",
+    name: "Brown Dog by I_love_SunSets_A_lot"
+},
+
+{
+    file: "journal-purple-oreo.png",
+    name: "Purple Oreo by Olliez"
+},
+
+{
+    file: "journal-horse55.png",
+    name: "Dog by horse55"
+}
 
     ];
 
@@ -17952,13 +17984,13 @@ ${
                                 getSavedDiaryEntries()
                                     .slice()
                                     .sort(
-                                        function(a, b) {
-                                            return (
-                                                new Date(a.createdAt) -
-                                                new Date(b.createdAt)
-                                            );
-                                        }
-                                    ),
+    function(a, b) {
+        return (
+            new Date(a.createdAt) -
+            new Date(b.createdAt)
+        );
+    }
+),
                                 ${pageIndex - 1}
                             )
                         "
@@ -17998,8 +18030,8 @@ ${
                                     .sort(
                                         function(a, b) {
                                             return (
-                                                new Date(b.createdAt) -
-                                                new Date(a.createdAt)
+                                                new Date(a.createdAt) -
+new Date(b.createdAt)
                                             );
                                         }
                                     ),
