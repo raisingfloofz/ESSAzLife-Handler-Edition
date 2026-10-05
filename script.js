@@ -1041,18 +1041,6 @@ if (homeButton) {
 }
 
 
-// Play Mode
-const playModeButton =
-    document.getElementById("play-mode-button");
-
-if (playModeButton) {
-    playModeButton.onclick =
-        function() {
-            showPlayModePopup();
-        };
-}
-
-
 // Help
 const helpButton =
     document.getElementById("help-button");
@@ -1089,78 +1077,76 @@ if (logoutButton) {
 }
 }
 
-function showPlayModePopup() {
+// ==========================================
+// SWITCH ESSAZLIFE APP
+// ==========================================
 
-    const oldPopup =
-        document.getElementById(
-            "play-mode-popup"
-        );
-
-    if (oldPopup) {
-        oldPopup.remove();
-    }
-
-    const popup =
-        document.createElement(
-            "div"
-        );
-
-    popup.id =
-        "play-mode-popup";
-
-    popup.innerHTML = `
-
-        <div class="training-delete-overlay">
-
-            <div class="training-delete-box">
-
-                <h2>
-                    🎮 Open Play Mode?
-                </h2>
-
-                <p>
-                    This feature is not yet available, 
-                    tune in to Raising Floofz on YouTube for updates!
-                </p>
-
-                <div class="training-delete-buttons">
-
-                    <button
-                        class="handler-action-button"
-                        onclick="
-                            document.getElementById(
-                                'play-mode-popup'
-                            ).remove()
-                        "
-                    >
-                        Cancel
-                    </button>
-
-                    <button
-                        class="handler-action-button primary"
-                        onclick="
-                            openPlayMode()
-                        "
-                    >
-                        Open Play Mode
-                    </button>
-
-                </div>
-
-            </div>
-
-        </div>
-    `;
-
-    document.body.appendChild(
-        popup
+const switchButton =
+    document.getElementById(
+        "switch-button"
     );
-}
 
-function openPlayMode() {
-    window.location.href =
-        "https://raisingfloofz.github.io/ESSAzLife-PlayMode/";
-}
+const switchOverlay =
+    document.getElementById(
+        "switch-overlay"
+    );
+
+const closeSwitchButton =
+    document.getElementById(
+        "close-switch-button"
+    );
+
+const switchPlayModeButton =
+    document.getElementById(
+        "switch-playmode-button"
+    );
+
+const switchChorezButton =
+    document.getElementById(
+        "switch-chorez-button"
+    );
+
+
+switchButton.addEventListener(
+    "click",
+    () => {
+
+        switchOverlay.classList.remove(
+            "hidden"
+        );
+    }
+);
+
+
+closeSwitchButton.addEventListener(
+    "click",
+    () => {
+
+        switchOverlay.classList.add(
+            "hidden"
+        );
+    }
+);
+
+
+switchPlayModeButton.addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "https://raisingfloofz.github.io/ESSAzLife-PlayMode/";
+    }
+);
+
+
+switchChorezButton.addEventListener(
+    "click",
+    () => {
+
+        window.location.href =
+            "https://raisingfloofz.github.io/ESSAzLife-Chorez/";
+    }
+);
 
 /* =========================================================
    THEME HELPERS
