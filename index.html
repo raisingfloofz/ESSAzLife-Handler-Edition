@@ -34,12 +34,12 @@
             ESSAzLife · Handler Edition
         </div>
 
-       <div class="header-buttons">
-    <button id="home-button">🏠 Home</button>
-    <button id="switch-button">🔄 Switch</button>
-    <button id="help-button">?</button>
-    <button id="profile-button">Profile</button>
-    <button id="logout-button">Log Out</button>
+      <div class="header-buttons">
+    <button id="updates-button" title="Updates" aria-label="Updates">📢</button>
+    <button id="home-button" title="Home" aria-label="Home">🏠</button>
+    <button id="switch-button" title="Switch Apps" aria-label="Switch Apps">🔄</button>
+    <button id="help-button" title="Help" aria-label="Help">❓</button>
+    <button id="profile-button" title="Profile" aria-label="Profile">👤</button>
 </div>
     </header>
 
@@ -78,6 +78,38 @@
             type="button"
         >
             CANCEL
+        </button>
+
+    </div>
+</div>
+
+<!-- =========================================
+     UPDATES POPUP
+========================================= -->
+
+<div id="updates-overlay" class="updates-overlay hidden">
+    <div class="updates-popup">
+
+        <h2>📢 Handler Edition Updates</h2>
+
+        <p>
+            Check here for the latest ESSAzLife
+            Handler Edition updates, fixes, and announcements!
+        </p>
+
+        <div class="updates-content">
+            <h3>October 9, 2026</h3>
+            <p>
+              Handler Edition released on October 1st, 2026 @ 4:00pm. 
+              Today is October 9th, 2026. I have updated the navigation 
+              header so the tabs are represented cleanly by emojis, and 
+              we now have an updates tab. All future updates will appear here. 
+              There are currently no scheduled updates as of October 9, 2026 @ 1:02pm.
+            </p>
+        </div>
+
+        <button id="close-updates-button" type="button">
+            CLOSE
         </button>
 
     </div>

@@ -1878,29 +1878,10 @@ function showCreateAccountForm() {
                     line-height:1.5;
                 "
             >
-                Create an email, username, and password
+                Create a username and password
                 for your local ESSAzLife account.
             </p>
 
-
-            <label>
-                Email
-            </label>
-
-            <input
-                id="create-email"
-                type="email"
-                autocomplete="email"
-
-                style="
-                    width:100%;
-                    box-sizing:border-box;
-                    padding:12px;
-                    margin:7px 0 18px 0;
-                    border:1px solid #ccd7da;
-                    border-radius:10px;
-                "
-            >
 
 
             <label>
@@ -2111,15 +2092,6 @@ function showCreateAccountForm() {
 
 async function createAccount() {
 
-    const email =
-        document
-            .getElementById(
-                "create-email"
-            )
-            ?.value
-            .trim()
-            .toLowerCase();
-
 
     const username =
         document
@@ -2181,7 +2153,6 @@ async function createAccount() {
 
 
     if (
-        !email ||
         !username ||
         !password ||
         !confirmPassword ||
@@ -2193,20 +2164,6 @@ async function createAccount() {
 
         alert(
             "Please fill out every field."
-        );
-
-        return;
-    }
-
-
-    if (
-        !email.includes(
-            "@"
-        )
-    ) {
-
-        alert(
-            "Please enter a valid email address."
         );
 
         return;
@@ -2255,32 +2212,6 @@ async function createAccount() {
     const accounts =
         getAccounts();
 
-
-    const emailExists =
-        accounts.some(
-            function(account) {
-
-                return (
-                    String(
-                        account.email
-                    )
-                        .toLowerCase() ===
-                    email
-                );
-            }
-        );
-
-
-    if (emailExists) {
-
-        alert(
-            "An account already uses that email."
-        );
-
-        return;
-    }
-
-
     const usernameExists =
         accounts.some(
             function(account) {
@@ -2320,9 +2251,6 @@ async function createAccount() {
                 makeId(
                     "user"
                 ),
-
-            email:
-                email,
 
             username:
                 username,
@@ -2386,9 +2314,6 @@ async function createAccount() {
 
 
         pendingWelcomeCredentials = {
-
-            email:
-                email,
 
             username:
                 username,
@@ -2545,15 +2470,6 @@ function renderOneTimeWelcome() {
 
 
                 <p>
-                    <strong>Email:</strong><br>
-
-                    ${escapeHTML(
-                        credentials.email
-                    )}
-                </p>
-
-
-                <p>
                     <strong>Username:</strong><br>
 
                     ${escapeHTML(
@@ -2623,11 +2539,11 @@ function renderOneTimeWelcome() {
             </div>
 
 
-            <p>
-                If you forget your password, you will need
-                your saved email and account recovery answers
-                before you can create a new password.
-            </p>
+           <p>
+    If you forget your password, you will need
+    your saved username and account recovery answers
+    before you can create a new password.
+</p>
 
 
             <p>
@@ -2762,7 +2678,7 @@ function showLoginForm() {
 
 
             <label>
-                Email or Username
+                Username
             </label>
 
             <input
@@ -2872,45 +2788,21 @@ async function loginUser() {
     ) {
 
         alert(
-            "Please enter your email or username and password."
+            "Please enter your username and password."
         );
 
         return;
     }
 
 
-    const account =
-        getAccounts().find(
-            function(item) {
-
-                const email =
-                    String(
-                        item.email ||
-                        ""
-                    )
-                        .toLowerCase();
-
-
-                const username =
-                    String(
-                        item.username ||
-                        ""
-                    )
-                        .toLowerCase();
-
-
-                return (
-                    email === identity ||
-                    username === identity
-                );
-            }
-        );
-
+    const account = getAccounts().find(function(item) {
+    return String(item.username || "").toLowerCase() === identity;
+});
 
     if (!account) {
 
         alert(
-            "No ESSAzLife account was found with that email or username."
+            "No ESSAzLife account was found with that username."
         );
 
         return;
@@ -3019,29 +2911,21 @@ function showForgotPasswordForm() {
                     line-height:1.5;
                 "
             >
-                Enter the email saved to your ESSAzLife account.
+                Enter the username saved to your ESSAzLife account.
             </p>
 
 
             <label>
-                Email
+                Username
             </label>
-
+            
             <input
-                id="forgot-email"
-                type="email"
-                autocomplete="email"
-
-                style="
-                    width:100%;
-                    box-sizing:border-box;
-                    padding:12px;
-                    margin:7px 0 18px 0;
-                    border:1px solid #ccd7da;
-                    border-radius:10px;
-                "
-            >
-
+    id="forgot-username"
+    type="text"
+    autocomplete="username"
+    placeholder="Enter your username"
+    style="width:100%; box-sizing:border-box; padding:12px; margin:7px 0 18px 0; border:1px solid #ccd7da; border-radius:10px;"
+>
 
             <button
                 onclick="
@@ -3071,8 +2955,7 @@ function showForgotPasswordForm() {
                     line-height:1.5;
                 "
             >
-                This local prototype cannot send a real email yet.
-                For now, password resetting happens on this device.
+               Password recovery happens locally on this device.
             </p>
 
         </div>
@@ -3083,51 +2966,26 @@ function showForgotPasswordForm() {
 
 function findPasswordResetAccount() {
 
-    const email =
-        document
-            .getElementById(
-                "forgot-email"
-            )
-            ?.value
-            .trim()
-            .toLowerCase();
+    const username = document
+        .getElementById("forgot-username")
+        ?.value
+        .trim()
+        .toLowerCase();
 
-
-    if (!email) {
-
-        alert(
-            "Please enter your email."
-        );
-
+    if (!username) {
+        alert("Please enter your username.");
         return;
     }
 
-
-    const account =
-        getAccounts().find(
-            function(item) {
-
-                return (
-                    String(
-                        item.email ||
-                        ""
-                    )
-                        .toLowerCase() ===
-                    email
-                );
-            }
-        );
-
+    const account = getAccounts().find(function(item) {
+        return String(item.username || "")
+            .toLowerCase() === username;
+    });
 
     if (!account) {
-
-        alert(
-            "No ESSAzLife account was found with that email."
-        );
-
+        alert("No ESSAzLife account was found with that username.");
         return;
     }
-
 
     if (
         !account.recoveryBirthMonth ||
@@ -3296,9 +3154,9 @@ function showPasswordRecoveryQuestions(
                     Account:
                 </strong>
 
-                ${escapeHTML(
-                    account.email
-                )}
+               ${escapeHTML(
+    account.username
+)}
             </p>
 
 
@@ -3625,9 +3483,9 @@ function showLocalPasswordReset(
             >
                 Account:
                 <strong>
-                    ${escapeHTML(
-                        account.email
-                    )}
+                  ${escapeHTML(
+    account.username
+)}
                 </strong>
             </p>
 
@@ -4748,23 +4606,6 @@ function renderProfile() {
 
 
             <label>
-                Email
-            </label>
-
-
-            <input
-                id="profile-email"
-
-                type="email"
-
-                value="${escapeHTML(
-                    user.email ||
-                    ""
-                )}"
-            >
-
-
-            <label>
                 Nickname
             </label>
 
@@ -5662,17 +5503,6 @@ function saveProfile() {
             .value
             .trim();
 
-
-    const email =
-        document
-            .getElementById(
-                "profile-email"
-            )
-            .value
-            .trim()
-            .toLowerCase();
-
-
     if (
         username.length <
         3
@@ -5686,75 +5516,36 @@ function saveProfile() {
     }
 
 
-    if (
-        !email ||
-        !email.includes(
-            "@"
-        )
-    ) {
-
-        alert(
-            "Please enter a valid email."
-        );
-
-        return;
-    }
-
-
     const accounts =
         getAccounts();
 
 
-    const duplicate =
-        accounts.some(
-            function(account) {
+const duplicate =
+    accounts.some(
+        function(account) {
 
-                if (
-                    String(
-                        account.id
-                    ) ===
-                    String(
-                        current.id
-                    )
-                ) {
-
-                    return false;
-                }
-
-
-                return (
-
-                    String(
-                        account.username ||
-                        ""
-                    )
-                        .toLowerCase() ===
-                    username
-                        .toLowerCase()
-
-                    ||
-
-                    String(
-                        account.email ||
-                        ""
-                    )
-                        .toLowerCase() ===
-                    email
-
-                );
-
+            if (
+                String(account.id) ===
+                String(current.id)
+            ) {
+                return false;
             }
-        );
 
+            return (
+                String(account.username || "")
+                    .toLowerCase() ===
+                username.toLowerCase()
+            );
+        }
+    );
 
-    if (duplicate) {
+if (duplicate) {
+    alert(
+        "That username is already being used by another account."
+    );
 
-        alert(
-            "That username or email is already being used by another account."
-        );
-
-        return;
-    }
+    return;
+}
 
 
     const index =
@@ -5787,13 +5578,6 @@ function saveProfile() {
         index
     ].username =
         username;
-
-
-    accounts[
-        index
-    ].email =
-        email;
-
 
     accounts[
         index
@@ -23880,3 +23664,31 @@ context.fillText(
     canvas.height * 0.838
 );
 }
+
+/* =========================================
+   HANDLER EDITION UPDATES POPUP
+========================================= */
+
+document.addEventListener("DOMContentLoaded", function () {
+    const updatesButton = document.getElementById("updates-button");
+    const updatesOverlay = document.getElementById("updates-overlay");
+    const closeUpdatesButton = document.getElementById("close-updates-button");
+
+    if (!updatesButton || !updatesOverlay || !closeUpdatesButton) {
+        return;
+    }
+
+    updatesButton.addEventListener("click", function () {
+        updatesOverlay.classList.remove("hidden");
+    });
+
+    closeUpdatesButton.addEventListener("click", function () {
+        updatesOverlay.classList.add("hidden");
+    });
+
+    updatesOverlay.addEventListener("click", function (event) {
+        if (event.target === updatesOverlay) {
+            updatesOverlay.classList.add("hidden");
+        }
+    });
+});
