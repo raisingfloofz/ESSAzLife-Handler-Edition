@@ -1761,6 +1761,29 @@ function renderAuthHome() {
                     Log In
                 </button>
 
+                
+            <p
+                style="
+                    text-align:center;
+                    font-size:12px;
+                    color:#777;
+                    margin:12px 0 0;
+                "
+            >
+                Need Guest Mode?
+                <a
+                    href="https://raisingfloofz.github.io/ESSAzLife.World/"
+                    style="
+                        color:#3b9f99;
+                        font-weight:bold;
+                        text-decoration:underline;
+                    "
+                >
+                    Go to ESSAzLife World.
+                </a>
+            </p>
+
+
             </div>
 
         </div>
